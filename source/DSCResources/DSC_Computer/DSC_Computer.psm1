@@ -124,15 +124,16 @@ function Get-TargetResource
         -ClientOnly
 
     $returnValue = @{
-        Name             = $env:COMPUTERNAME
-        DomainName       = Get-ComputerDomain
-        JoinOU           = $JoinOU
-        CurrentOU        = Get-ComputerOU
-        Credential       = [ciminstance] $convertToCimCredential
-        UnjoinCredential = [ciminstance] $convertToCimUnjoinCredential
-        WorkGroupName    = (Get-CimInstance -Class 'Win32_ComputerSystem').Workgroup
-        Description      = (Get-CimInstance -Class 'Win32_OperatingSystem').Description
-        Server           = Get-LogonServer
+        Name                         = $env:COMPUTERNAME
+        DomainName                   = Get-ComputerDomain
+        JoinOU                       = $JoinOU
+        CurrentOU                    = Get-ComputerOU
+        Credential                   = [ciminstance] $convertToCimCredential
+        UnjoinCredential             = [ciminstance] $convertToCimUnjoinCredential
+        WorkGroupName                = (Get-CimInstance -Class 'Win32_ComputerSystem').Workgroup
+        Description                  = (Get-CimInstance -Class 'Win32_OperatingSystem').Description
+        Server                       = Get-LogonServer
+        DeleteExistingComputerAccount = $DeleteExistingComputerAccount
     }
 
     return $returnValue
@@ -293,7 +294,7 @@ function Set-TargetResource
                 }
                 else
                 {
-                    Write-Verbose -Message ($script:localizedData.KeepingExistingComputerObject -f $Name)
+                    Write-Verbose -Message ($script:localizedData.SkippingExistingComputerObjectDeletion -f $Name)
                 }
 
                 if (-not [System.String]::IsNullOrEmpty($Options))
