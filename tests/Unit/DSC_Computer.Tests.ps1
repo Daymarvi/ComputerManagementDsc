@@ -862,6 +862,52 @@ Describe 'DSC_Computer\Set-TargetResource' {
         }
     }
 
+    Context 'Changes ComputerName and changes Domain to new Domain with DeleteExistingComputerAccount false' {
+        BeforeAll {
+            Mock -CommandName Get-WMIObject -MockWith {
+                [PSCustomObject] @{
+                    Domain       = 'Contoso.com';
+                    Workgroup    = 'Contoso.com';
+                    PartOfDomain = $true
+                }
+            }
+
+            Mock -CommandName Get-ADSIComputer -MockWith {
+                [PSCustomObject] @{
+                    Path = 'LDAP://Contoso.com/CN=mocked-comp,OU=Computers,DC=Contoso,DC=com';
+                }
+            }
+
+            Mock -CommandName Get-ComputerDomain -MockWith {
+                'contoso.com'
+            }
+
+            Mock -CommandName Add-Computer
+        }
+
+        It 'Should not delete the existing computer account' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $setTargetParams = @{
+                    Name                         = 'othername'
+                    DomainName                   = 'adventure-works.com'
+                    Credential                   = $credential
+                    UnjoinCredential             = $credential
+                    DeleteExistingComputerAccount = $false
+                }
+
+                Set-TargetResource @setTargetParams | Should -BeNullOrEmpty
+            }
+
+            Should -Invoke -CommandName Rename-Computer -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Add-Computer -Exactly -Times 1 -Scope It -ParameterFilter { $DomainName -and $NewName }
+            Should -Invoke -CommandName Add-Computer -Exactly -Times 0 -Scope It -ParameterFilter { $WorkGroupName }
+            Should -Invoke -CommandName Get-ADSIComputer -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Remove-ADSIObject -Exactly -Times 0 -Scope It
+        }
+    }
+
     Context 'When ComputerName changes and Domain changes to new Domain with specified OU' {
         BeforeAll {
             Mock -CommandName Get-WMIObject -MockWith {
@@ -985,6 +1031,51 @@ Describe 'DSC_Computer\Set-TargetResource' {
             Should -Invoke -CommandName Add-Computer -Exactly -Times 0 -Scope It -ParameterFilter { $WorkGroupName }
             Should -Invoke -CommandName Get-ADSIComputer -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Remove-ADSIObject -Exactly -Times 1 -Scope It
+        }
+    }
+
+    Context 'When ComputerName changes and Workgroup changes to Domain with DeleteExistingComputerAccount false' {
+        BeforeAll {
+            Mock -CommandName Get-WMIObject -MockWith {
+                [PSCustomObject] @{
+                    Domain       = 'Contoso';
+                    Workgroup    = 'Contoso';
+                    PartOfDomain = $false
+                }
+            }
+
+            Mock -CommandName Get-ADSIComputer -MockWith {
+                [PSCustomObject] @{
+                    Path = 'LDAP://Contoso.com/CN=mocked-comp,OU=Computers,DC=Contoso,DC=com';
+                }
+            }
+
+            Mock -CommandName Get-ComputerDomain -MockWith {
+                ''
+            }
+
+            Mock -CommandName Add-Computer
+        }
+
+        It 'Should not delete the existing computer account' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $setTargetParams = @{
+                    Name                         = 'othername'
+                    DomainName                   = 'Contoso.com'
+                    Credential                   = $credential
+                    DeleteExistingComputerAccount = $false
+                }
+
+                Set-TargetResource @setTargetParams | Should -BeNullOrEmpty
+            }
+
+            Should -Invoke -CommandName Rename-Computer -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Add-Computer -Exactly -Times 1 -Scope It -ParameterFilter { $DomainName -and $NewName }
+            Should -Invoke -CommandName Add-Computer -Exactly -Times 0 -Scope It -ParameterFilter { $WorkGroupName }
+            Should -Invoke -CommandName Get-ADSIComputer -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Remove-ADSIObject -Exactly -Times 0 -Scope It
         }
     }
 

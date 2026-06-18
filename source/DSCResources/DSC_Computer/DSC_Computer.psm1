@@ -47,6 +47,11 @@ $FailToRenameAfterJoinDomainErrorId = 'FailToRenameAfterJoinDomain,Microsoft.Pow
 
     .PARAMETER Options
         Specifies advanced options for the Add-Computer join operation.
+
+    .PARAMETER DeleteExistingComputerAccount
+        If $true (default), an existing computer account with the same name
+        in the domain will be deleted and recreated. If $false, the existing
+        computer account will be reused.
 #>
 function Get-TargetResource
 {
@@ -91,7 +96,11 @@ function Get-TargetResource
         [Parameter()]
         [ValidateSet('AccountCreate', 'Win9XUpgrade', 'UnsecuredJoin', 'PasswordPass', 'JoinWithNewName', 'JoinReadOnly', 'InstallInvoke')]
         [System.String[]]
-        $Options
+        $Options,
+
+        [Parameter()]
+        [System.Boolean]
+        $DeleteExistingComputerAccount = $true
     )
 
     Write-Verbose -Message ($script:localizedData.GettingComputerStateMessage -f $Name)
@@ -160,6 +169,11 @@ function Get-TargetResource
 
     .PARAMETER Options
         Specifies advanced options for the Add-Computer join operation.
+
+    .PARAMETER DeleteExistingComputerAccount
+        If $true (default), an existing computer account with the same name
+        in the domain will be deleted and recreated. If $false, the existing
+        computer account will be reused.
 #>
 function Set-TargetResource
 {
@@ -203,7 +217,11 @@ function Set-TargetResource
         [Parameter()]
         [ValidateSet('AccountCreate', 'Win9XUpgrade', 'UnsecuredJoin', 'PasswordPass', 'JoinWithNewName', 'JoinReadOnly', 'InstallInvoke')]
         [System.String[]]
-        $Options
+        $Options,
+
+        [Parameter()]
+        [System.Boolean]
+        $DeleteExistingComputerAccount = $true
     )
 
     Write-Verbose -Message ($script:localizedData.SettingComputerStateMessage -f $Name)
@@ -262,13 +280,20 @@ function Set-TargetResource
                     $addComputerParameters.Add("Server", $Server)
                 }
 
-                # Check for existing computer objecst using ADSI without ActiveDirectory module
-                $computerObject = Get-ADSIComputer -Name $Name -DomainName $DomainName -Credential $Credential
-
-                if ($computerObject)
+                # Check for existing computer objects using ADSI without ActiveDirectory module
+                if ($DeleteExistingComputerAccount)
                 {
-                    Remove-ADSIObject -Path $computerObject.Path -Credential $Credential
-                    Write-Verbose -Message ($script:localizedData.DeletedExistingComputerObject -f $Name, $computerObject.Path)
+                    $computerObject = Get-ADSIComputer -Name $Name -DomainName $DomainName -Credential $Credential
+
+                    if ($computerObject)
+                    {
+                        Remove-ADSIObject -Path $computerObject.Path -Credential $Credential
+                        Write-Verbose -Message ($script:localizedData.DeletedExistingComputerObject -f $Name, $computerObject.Path)
+                    }
+                }
+                else
+                {
+                    Write-Verbose -Message ($script:localizedData.KeepingExistingComputerObject -f $Name)
                 }
 
                 if (-not [System.String]::IsNullOrEmpty($Options))
@@ -458,6 +483,11 @@ function Set-TargetResource
 
     .PARAMETER Options
         Specifies advanced options for the Add-Computer join operation.
+
+    .PARAMETER DeleteExistingComputerAccount
+        If $true (default), an existing computer account with the same name
+        in the domain will be deleted and recreated. If $false, the existing
+        computer account will be reused.
 #>
 function Test-TargetResource
 {
@@ -502,7 +532,11 @@ function Test-TargetResource
         [Parameter()]
         [ValidateSet('AccountCreate', 'Win9XUpgrade', 'UnsecuredJoin', 'PasswordPass', 'JoinWithNewName', 'JoinReadOnly', 'InstallInvoke')]
         [System.String[]]
-        $Options
+        $Options,
+
+        [Parameter()]
+        [System.Boolean]
+        $DeleteExistingComputerAccount = $true
     )
 
     Write-Verbose -Message ($script:localizedData.TestingComputerStateMessage -f $Name)
@@ -812,6 +846,11 @@ function Remove-ADSIObject
 
     .PARAMETER Options
         Specifies advanced options for the Add-Computer join operation.
+
+    .PARAMETER DeleteExistingComputerAccount
+        If $true (default), an existing computer account with the same name
+        in the domain will be deleted and recreated. If $false, the existing
+        computer account will be reused.
 #>
 function Assert-ResourceProperty
 {
@@ -855,7 +894,11 @@ function Assert-ResourceProperty
         [Parameter()]
         [ValidateSet('AccountCreate', 'Win9XUpgrade', 'UnsecuredJoin', 'PasswordPass', 'JoinWithNewName', 'JoinReadOnly', 'InstallInvoke')]
         [System.String[]]
-        $Options
+        $Options,
+
+        [Parameter()]
+        [System.Boolean]
+        $DeleteExistingComputerAccount = $true
     )
 
     if ($options -contains 'PasswordPass' -and
