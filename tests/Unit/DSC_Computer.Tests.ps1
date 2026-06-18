@@ -723,7 +723,7 @@ Describe 'DSC_Computer\Get-TargetResource' {
                 $result = Get-TargetResource @getTargetParams
 
                 $result.GetType().Fullname | Should -Be 'System.Collections.Hashtable'
-                $result.Keys | Sort-Object | Should -Be @('Credential', 'CurrentOU', 'Description', 'DomainName', 'JoinOU', 'Name', 'Server', 'UnjoinCredential', 'WorkGroupName')
+                $result.Keys | Sort-Object | Should -Be @('Credential', 'CurrentOU', 'DeleteExistingComputerAccount', 'Description', 'DomainName', 'JoinOU', 'Name', 'Server', 'UnjoinCredential', 'WorkGroupName')
             }
         }
     }
