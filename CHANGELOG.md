@@ -5,6 +5,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Computer
+  - Added `DeleteExistingComputerAccount` parameter to control whether an
+    existing AD computer account is deleted and recreated when joining a domain.
+    Default is `$true` (historical behavior). Set to `$false` to reuse the
+    existing account and preserve SID, group memberships, and GPO links.
+
 ### Changed
 
 - `azure-pipelines.yml`
