@@ -48,10 +48,12 @@ $FailToRenameAfterJoinDomainErrorId = 'FailToRenameAfterJoinDomain,Microsoft.Pow
     .PARAMETER Options
         Specifies advanced options for the Add-Computer join operation.
 
-    .PARAMETER DeleteExistingComputerAccount
-        If $true (default), an existing computer account with the same name
-        in the domain will be deleted and recreated. If $false, the existing
-        computer account will be reused.
+    .PARAMETER ReuseExistingComputerAccount
+        If $true, the existing computer account in the domain will be reused
+        instead of being deleted and recreated. The machine account password
+        will be reset. This preserves the machine SID, group memberships,
+        and GPO links. If not specified or $false, the existing account is
+        deleted and recreated (historical behavior).
 #>
 function Get-TargetResource
 {
@@ -100,7 +102,7 @@ function Get-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $DeleteExistingComputerAccount = $true
+        $ReuseExistingComputerAccount
     )
 
     Write-Verbose -Message ($script:localizedData.GettingComputerStateMessage -f $Name)
@@ -133,7 +135,7 @@ function Get-TargetResource
         WorkGroupName                = (Get-CimInstance -Class 'Win32_ComputerSystem').Workgroup
         Description                  = (Get-CimInstance -Class 'Win32_OperatingSystem').Description
         Server                       = Get-LogonServer
-        DeleteExistingComputerAccount = $DeleteExistingComputerAccount
+        ReuseExistingComputerAccount = $ReuseExistingComputerAccount
     }
 
     return $returnValue
@@ -171,10 +173,12 @@ function Get-TargetResource
     .PARAMETER Options
         Specifies advanced options for the Add-Computer join operation.
 
-    .PARAMETER DeleteExistingComputerAccount
-        If $true (default), an existing computer account with the same name
-        in the domain will be deleted and recreated. If $false, the existing
-        computer account will be reused.
+    .PARAMETER ReuseExistingComputerAccount
+        If $true, the existing computer account in the domain will be reused
+        instead of being deleted and recreated. The machine account password
+        will be reset. This preserves the machine SID, group memberships,
+        and GPO links. If not specified or $false, the existing account is
+        deleted and recreated (historical behavior).
 #>
 function Set-TargetResource
 {
@@ -222,7 +226,7 @@ function Set-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $DeleteExistingComputerAccount = $true
+        $ReuseExistingComputerAccount
     )
 
     Write-Verbose -Message ($script:localizedData.SettingComputerStateMessage -f $Name)
@@ -282,7 +286,7 @@ function Set-TargetResource
                 }
 
                 # Check for existing computer objects using ADSI without ActiveDirectory module
-                if ($DeleteExistingComputerAccount)
+                if (-not $ReuseExistingComputerAccount)
                 {
                     $computerObject = Get-ADSIComputer -Name $Name -DomainName $DomainName -Credential $Credential
 
@@ -485,10 +489,12 @@ function Set-TargetResource
     .PARAMETER Options
         Specifies advanced options for the Add-Computer join operation.
 
-    .PARAMETER DeleteExistingComputerAccount
-        If $true (default), an existing computer account with the same name
-        in the domain will be deleted and recreated. If $false, the existing
-        computer account will be reused.
+    .PARAMETER ReuseExistingComputerAccount
+        If $true, the existing computer account in the domain will be reused
+        instead of being deleted and recreated. The machine account password
+        will be reset. This preserves the machine SID, group memberships,
+        and GPO links. If not specified or $false, the existing account is
+        deleted and recreated (historical behavior).
 #>
 function Test-TargetResource
 {
@@ -537,7 +543,7 @@ function Test-TargetResource
 
         [Parameter()]
         [System.Boolean]
-        $DeleteExistingComputerAccount = $true
+        $ReuseExistingComputerAccount
     )
 
     Write-Verbose -Message ($script:localizedData.TestingComputerStateMessage -f $Name)
@@ -848,10 +854,12 @@ function Remove-ADSIObject
     .PARAMETER Options
         Specifies advanced options for the Add-Computer join operation.
 
-    .PARAMETER DeleteExistingComputerAccount
-        If $true (default), an existing computer account with the same name
-        in the domain will be deleted and recreated. If $false, the existing
-        computer account will be reused.
+    .PARAMETER ReuseExistingComputerAccount
+        If $true, the existing computer account in the domain will be reused
+        instead of being deleted and recreated. The machine account password
+        will be reset. This preserves the machine SID, group memberships,
+        and GPO links. If not specified or $false, the existing account is
+        deleted and recreated (historical behavior).
 #>
 function Assert-ResourceProperty
 {
@@ -899,7 +907,7 @@ function Assert-ResourceProperty
 
         [Parameter()]
         [System.Boolean]
-        $DeleteExistingComputerAccount = $true
+        $ReuseExistingComputerAccount
     )
 
     if ($options -contains 'PasswordPass' -and

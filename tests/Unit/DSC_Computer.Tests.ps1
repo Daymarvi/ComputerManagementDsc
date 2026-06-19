@@ -723,7 +723,7 @@ Describe 'DSC_Computer\Get-TargetResource' {
                 $result = Get-TargetResource @getTargetParams
 
                 $result.GetType().Fullname | Should -Be 'System.Collections.Hashtable'
-                $result.Keys | Sort-Object | Should -Be @('Credential', 'CurrentOU', 'DeleteExistingComputerAccount', 'Description', 'DomainName', 'JoinOU', 'Name', 'Server', 'UnjoinCredential', 'WorkGroupName')
+                $result.Keys | Sort-Object | Should -Be @('Credential', 'CurrentOU', 'Description', 'DomainName', 'JoinOU', 'Name', 'ReuseExistingComputerAccount', 'Server', 'UnjoinCredential', 'WorkGroupName')
             }
         }
     }
@@ -862,7 +862,7 @@ Describe 'DSC_Computer\Set-TargetResource' {
         }
     }
 
-    Context 'Changes ComputerName and changes Domain to new Domain with DeleteExistingComputerAccount false' {
+    Context 'Changes ComputerName and changes Domain to new Domain with ReuseExistingComputerAccount' {
         BeforeAll {
             Mock -CommandName Get-WMIObject -MockWith {
                 [PSCustomObject] @{
@@ -894,7 +894,7 @@ Describe 'DSC_Computer\Set-TargetResource' {
                     DomainName                   = 'adventure-works.com'
                     Credential                   = $credential
                     UnjoinCredential             = $credential
-                    DeleteExistingComputerAccount = $false
+                    ReuseExistingComputerAccount  = $true
                 }
 
                 Set-TargetResource @setTargetParams | Should -BeNullOrEmpty
@@ -1034,7 +1034,7 @@ Describe 'DSC_Computer\Set-TargetResource' {
         }
     }
 
-    Context 'When ComputerName changes and Workgroup changes to Domain with DeleteExistingComputerAccount false' {
+    Context 'When ComputerName changes and Workgroup changes to Domain with ReuseExistingComputerAccount' {
         BeforeAll {
             Mock -CommandName Get-WMIObject -MockWith {
                 [PSCustomObject] @{
@@ -1065,7 +1065,7 @@ Describe 'DSC_Computer\Set-TargetResource' {
                     Name                         = 'othername'
                     DomainName                   = 'Contoso.com'
                     Credential                   = $credential
-                    DeleteExistingComputerAccount = $false
+                    ReuseExistingComputerAccount  = $true
                 }
 
                 Set-TargetResource @setTargetParams | Should -BeNullOrEmpty

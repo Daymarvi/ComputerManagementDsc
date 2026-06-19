@@ -20,9 +20,10 @@
 <#
     .DESCRIPTION
         This configuration sets the machine name to 'Server01' and
-        joins the 'Contoso' domain while keeping any existing computer
-        account in Active Directory. This preserves the machine SID,
-        group memberships, and GPO links.
+        joins the 'Contoso' domain while reusing any existing computer
+        account in Active Directory. The machine account password will
+        be reset. This preserves the machine SID, group memberships,
+        and GPO links.
         Note: this requires an AD credential to join the domain.
 #>
 Configuration Computer_JoinDomainKeepExistingAccount_Config
@@ -44,7 +45,7 @@ Configuration Computer_JoinDomainKeepExistingAccount_Config
             Name                         = 'Server01'
             DomainName                   = 'Contoso'
             Credential                   = $Credential # Credential to join to domain
-            DeleteExistingComputerAccount = $false      # Keep existing AD computer account
+            ReuseExistingComputerAccount = $true       # Reuse existing AD computer account
         }
     }
 }
