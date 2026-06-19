@@ -862,7 +862,7 @@ Describe 'DSC_Computer\Set-TargetResource' {
         }
     }
 
-    Context 'Changes ComputerName and changes Domain to new Domain with ReuseExistingComputerAccount' {
+    Context 'When ComputerName changes and Domain changes to new Domain with ReuseExistingComputerAccount' {
         BeforeAll {
             Mock -CommandName Get-WMIObject -MockWith {
                 [PSCustomObject] @{
