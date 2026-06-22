@@ -903,7 +903,46 @@ Describe 'DSC_Computer\Set-TargetResource' {
             Should -Invoke -CommandName Rename-Computer -Exactly -Times 0 -Scope It
             Should -Invoke -CommandName Add-Computer -Exactly -Times 1 -Scope It -ParameterFilter { $DomainName -and $NewName }
             Should -Invoke -CommandName Add-Computer -Exactly -Times 0 -Scope It -ParameterFilter { $WorkGroupName }
-            Should -Invoke -CommandName Get-ADSIComputer -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Get-ADSIComputer -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Remove-ADSIObject -Exactly -Times 0 -Scope It
+        }
+    }
+
+    Context 'When ComputerName changes and Domain changes with ReuseExistingComputerAccount but no existing account' {
+        BeforeAll {
+            Mock -CommandName Get-WMIObject -MockWith {
+                [PSCustomObject] @{
+                    Domain       = 'Contoso.com';
+                    Workgroup    = 'Contoso.com';
+                    PartOfDomain = $true
+                }
+            }
+
+            Mock -CommandName Get-ADSIComputer
+            Mock -CommandName Get-ComputerDomain -MockWith {
+                'contoso.com'
+            }
+
+            Mock -CommandName Add-Computer
+        }
+
+        It 'Should not call Remove-ADSIObject' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $setTargetParams = @{
+                    Name                         = 'othername'
+                    DomainName                   = 'adventure-works.com'
+                    Credential                   = $credential
+                    UnjoinCredential             = $credential
+                    ReuseExistingComputerAccount  = $true
+                }
+
+                Set-TargetResource @setTargetParams | Should -BeNullOrEmpty
+            }
+
+            Should -Invoke -CommandName Add-Computer -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Get-ADSIComputer -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Remove-ADSIObject -Exactly -Times 0 -Scope It
         }
     }
@@ -1074,7 +1113,7 @@ Describe 'DSC_Computer\Set-TargetResource' {
             Should -Invoke -CommandName Rename-Computer -Exactly -Times 0 -Scope It
             Should -Invoke -CommandName Add-Computer -Exactly -Times 1 -Scope It -ParameterFilter { $DomainName -and $NewName }
             Should -Invoke -CommandName Add-Computer -Exactly -Times 0 -Scope It -ParameterFilter { $WorkGroupName }
-            Should -Invoke -CommandName Get-ADSIComputer -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Get-ADSIComputer -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Remove-ADSIObject -Exactly -Times 0 -Scope It
         }
     }

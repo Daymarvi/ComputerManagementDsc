@@ -50,10 +50,9 @@ $FailToRenameAfterJoinDomainErrorId = 'FailToRenameAfterJoinDomain,Microsoft.Pow
 
     .PARAMETER ReuseExistingComputerAccount
         If $true, the existing computer account in the domain will be reused
-        instead of being deleted and recreated. The machine account password
-        will be reset. This preserves the machine SID, group memberships,
-        and GPO links. If not specified or $false, the existing account is
-        deleted and recreated (historical behavior).
+        instead of being deleted and recreated. This preserves the machine
+        SID, group memberships, and GPO links. If not specified or $false,
+        the existing account is deleted and recreated.
 #>
 function Get-TargetResource
 {
@@ -175,10 +174,9 @@ function Get-TargetResource
 
     .PARAMETER ReuseExistingComputerAccount
         If $true, the existing computer account in the domain will be reused
-        instead of being deleted and recreated. The machine account password
-        will be reset. This preserves the machine SID, group memberships,
-        and GPO links. If not specified or $false, the existing account is
-        deleted and recreated (historical behavior).
+        instead of being deleted and recreated. This preserves the machine
+        SID, group memberships, and GPO links. If not specified or $false,
+        the existing account is deleted and recreated.
 #>
 function Set-TargetResource
 {
@@ -286,19 +284,26 @@ function Set-TargetResource
                 }
 
                 # Check for existing computer objects using ADSI without ActiveDirectory module
-                if (-not $ReuseExistingComputerAccount)
-                {
-                    $computerObject = Get-ADSIComputer -Name $Name -DomainName $DomainName -Credential $Credential
+                $computerObject = Get-ADSIComputer -Name $Name -DomainName $DomainName -Credential $Credential
 
+                if ($ReuseExistingComputerAccount)
+                {
+                    if ($computerObject)
+                    {
+                        Write-Verbose -Message ($script:localizedData.ReusingExistingComputerAccount -f $Name, $computerObject.Path)
+                    }
+                    else
+                    {
+                        Write-Verbose -Message ($script:localizedData.NoExistingComputerAccountFound -f $Name)
+                    }
+                }
+                else
+                {
                     if ($computerObject)
                     {
                         Remove-ADSIObject -Path $computerObject.Path -Credential $Credential
                         Write-Verbose -Message ($script:localizedData.DeletedExistingComputerObject -f $Name, $computerObject.Path)
                     }
-                }
-                else
-                {
-                    Write-Verbose -Message ($script:localizedData.SkippingExistingComputerObjectDeletion -f $Name)
                 }
 
                 if (-not [System.String]::IsNullOrEmpty($Options))
@@ -491,10 +496,9 @@ function Set-TargetResource
 
     .PARAMETER ReuseExistingComputerAccount
         If $true, the existing computer account in the domain will be reused
-        instead of being deleted and recreated. The machine account password
-        will be reset. This preserves the machine SID, group memberships,
-        and GPO links. If not specified or $false, the existing account is
-        deleted and recreated (historical behavior).
+        instead of being deleted and recreated. This preserves the machine
+        SID, group memberships, and GPO links. If not specified or $false,
+        the existing account is deleted and recreated.
 #>
 function Test-TargetResource
 {
@@ -856,10 +860,9 @@ function Remove-ADSIObject
 
     .PARAMETER ReuseExistingComputerAccount
         If $true, the existing computer account in the domain will be reused
-        instead of being deleted and recreated. The machine account password
-        will be reset. This preserves the machine SID, group memberships,
-        and GPO links. If not specified or $false, the existing account is
-        deleted and recreated (historical behavior).
+        instead of being deleted and recreated. This preserves the machine
+        SID, group memberships, and GPO links. If not specified or $false,
+        the existing account is deleted and recreated.
 #>
 function Assert-ResourceProperty
 {

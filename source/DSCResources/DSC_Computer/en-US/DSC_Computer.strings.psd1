@@ -17,7 +17,8 @@ ConvertFrom-StringData @'
     DomainNameAndWorkgroupNameError = Only DomainName or WorkGroupName can be specified at once.
     ComputerNotInDomainMessage = This machine is not a domain member.
     DeletedExistingComputerObject = Deleted existing computer object with name '{0}' at path '{1}'.
-    SkippingExistingComputerObjectDeletion = Skipping deletion of existing computer account for '{0}' because ReuseExistingComputerAccount is set to true. The machine account password will be reset during join.
+    ReusingExistingComputerAccount = Reusing existing computer account for '{0}' at path '{1}'.
+    NoExistingComputerAccountFound = No existing computer account found for '{0}'. A new account will be created during join.
     InvalidOptionPasswordPassUnsecuredJoin = Domain Join option 'PasswordPass' may not be specified if 'UnsecuredJoin' is specified.
     InvalidOptionCredentialUnsecuredJoinNullUsername = 'Credential' username must be null if 'UnsecuredJoin' is specified.
 '@

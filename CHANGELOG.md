@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `ReuseExistingComputerAccount` parameter to allow reusing an existing
     AD computer account when joining a domain instead of deleting and recreating
     it. When set to `$true`, the existing account is preserved (SID, group
-    memberships, GPO links) and the machine account password is reset. Default
-    is `$false` (historical behavior: delete and recreate) -
+    memberships, GPO links). If no existing account is found, a new one is
+    created. Default is `$false` -
     Fixes [Issue #457](https://github.com/dsccommunity/ComputerManagementDsc/issues/457).
 
 ### Changed
